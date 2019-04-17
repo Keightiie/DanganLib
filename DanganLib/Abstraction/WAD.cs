@@ -6,9 +6,11 @@ using System.Threading.Tasks;
 
 namespace DanganLib.Abstraction
 {
-    class WAD
+    public class WAD
     {
         public int FileCount { get; private set; }
+        int MajorVersion { get; set; }
+        int MinorVersion { get; set; }
 
         public void LoadFile(string filePath)
         {
@@ -19,5 +21,15 @@ namespace DanganLib.Abstraction
         {
 
         }
+
+        ///<summary>
+        ///Exports the contents of a wad file to a specified folder.
+        ///</summary>
+        public void Export(string exportPath)
+        {
+
+        }
+
+
     }
 }

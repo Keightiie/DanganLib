@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace DanganLib.CriWare
 {
-    class CPK
+    public class CPK
     {
     }
 }
