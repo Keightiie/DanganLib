@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DanganLib
+namespace DanganLib.Abstraction
 {
-    public class Class1
+    class WAD
     {
     }
 }
