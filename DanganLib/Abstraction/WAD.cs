@@ -8,24 +8,26 @@ namespace DanganLib.Abstraction
 {
     public class WAD
     {
+        string Magic { get; set; } = "AGAR";
+
         public int FileCount { get; private set; }
+        public int DirCount { get; private set; }
+        public string filePath { get; set; }
         int MajorVersion { get; set; }
         int MinorVersion { get; set; }
 
-        public void LoadFile(string filePath)
-        {
-
-        }
-
-        public void SaveFile(string savePath)
+        ///<summary>
+        ///Exports the contents of a wad file to a folder.
+        ///</summary>
+        public void Export(string exportPath)
         {
 
         }
 
         ///<summary>
-        ///Exports the contents of a wad file to a specified folder.
+        ///Compiles the contents of a folder into a wad file.
         ///</summary>
-        public void Export(string exportPath)
+        public void Compile(string compileDir, string exportPath)
         {
 
         }
