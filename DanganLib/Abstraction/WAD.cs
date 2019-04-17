@@ -8,5 +8,16 @@ namespace DanganLib.Abstraction
 {
     class WAD
     {
+        public int FileCount { get; private set; }
+
+        public void LoadFile(string filePath)
+        {
+
+        }
+
+        public void SaveFile(string savePath)
+        {
+
+        }
     }
 }
