@@ -18,6 +18,7 @@ namespace DanganLib.Abstraction
 
         public List<FileEntry> Files = new List<FileEntry>();
         public List<DirectoryEntry> Directories = new List<DirectoryEntry>();
+        long filesPosition { get; set; }
         #endregion
 
         BinaryReader wadBR; 
@@ -64,6 +65,8 @@ namespace DanganLib.Abstraction
                 Directories.Add(directory);
             }
 
+            filesPosition = wadBR.BaseStream.Position;
+
         }
 
         SubFileEntry ParseSubfile(BinaryReader wadBR)
@@ -95,7 +98,7 @@ namespace DanganLib.Abstraction
         public void Export(string exportPath)
         {
             if (wadBR == null)
-                throw new InvalidDataException("There is no file to extract from.");
+                throw new InvalidDataException("There is no data to extract from.");
 
             for (int i = 0; i < Directories.Count; i++)
             {
@@ -104,7 +107,7 @@ namespace DanganLib.Abstraction
 
             for (int i = 0; i < Files.Count; i++)
             {
-                wadBR.BaseStream.Position = Files[i].Offset;
+                wadBR.BaseStream.Position = filesPosition + Files[i].Offset;
                 var file = File.Create($"{exportPath}/{Files[i].Name}");
                 BinaryWriter bw = new BinaryWriter(file);
                 bw.Write(wadBR.ReadBytes((int)Files[i].Size));
