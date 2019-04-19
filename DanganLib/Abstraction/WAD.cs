@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.IO;
 
 namespace DanganLib.Abstraction
@@ -17,25 +16,28 @@ namespace DanganLib.Abstraction
         int HeaderSize { get; set; } = 0;
         byte[] Header { get; set; }
 
-        public int FileCount { get; private set; } = 0;
-        List<FileEntry> files = new List<FileEntry>();
-        public int DirCount { get; private set; }
+        public List<FileEntry> Files = new List<FileEntry>();
+        public List<DirectoryEntry> Directories = new List<DirectoryEntry>();
         #endregion
 
-        FileStream file;
+        FileStream File;
 
 
-
+        #region ClassDeclaration 
         public WAD() { }
 
+        ///<summary>
+        ///Creates a WAD variable after parsing an existing file.
+        ///</summary>
         public WAD(FileStream fs) {
-            file = fs ?? throw new ArgumentException("Can't load more then one wad at a time.", "fs");
-            BinaryReader wadBR = new BinaryReader(file);
+            File = fs ?? throw new ArgumentException("Can't load more then one wad at a time.", "fs");
+            BinaryReader wadBR = new BinaryReader(File);
             ParseFile(wadBR);
 
         }
+        #endregion
 
-
+        #region ParseData
         void ParseFile(BinaryReader wadBR)
         {
             Signature = Encoding.UTF8.GetString(wadBR.ReadBytes(4));
@@ -43,34 +45,61 @@ namespace DanganLib.Abstraction
             MinorVersion = wadBR.ReadInt32();
             HeaderSize = wadBR.ReadInt32();
             Header = wadBR.ReadBytes(HeaderSize);
-            FileCount = wadBR.ReadInt32();
+            int fileCount = wadBR.ReadInt32();
 
-            for(int i = 0; i < FileCount; i++)
+            for (int i = 0; i < fileCount; i++)
             {
-                FileEntry fileE = new FileEntry();
-                fileE.External = false;
-                int nameLength = wadBR.ReadInt32();
-                fileE.FileName = Encoding.ASCII.GetString(wadBR.ReadBytes(nameLength));
-                fileE.FileSize = wadBR.ReadInt64();
-                fileE.FileOffset = wadBR.ReadInt64();
-                files.Add(fileE);
+                FileEntry file = new FileEntry();
+                file.External = false;
+                file.Name = Encoding.ASCII.GetString(wadBR.ReadBytes(wadBR.ReadInt32()));
+                file.Size = wadBR.ReadInt64();
+                file.Offset = wadBR.ReadInt64();
+                Files.Add(file);
+            }
+            //Console.WriteLine(wadBR.BaseStream.Position);
+            int directoryCount = wadBR.ReadInt32();
 
+            Console.WriteLine(directoryCount);
+
+            for (int i = 0; i < directoryCount; i++)
+            {
+                DirectoryEntry directory = ParseDirEntry(wadBR);
+                Directories.Add(directory);
             }
 
+            Console.WriteLine(wadBR.BaseStream.Position);
 
         }
 
-        void ParseSubfile()
+        SubFileEntry ParseSubfile(BinaryReader wadBR)
         {
-
+            SubFileEntry subfile = new SubFileEntry();
+            subfile.Name = Encoding.ASCII.GetString(wadBR.ReadBytes(wadBR.ReadInt32()));
+            subfile.IsDirectory = wadBR.ReadByte() == 1;
+            return subfile;
         }
+
+        DirectoryEntry ParseDirEntry(BinaryReader wadBR)
+        {
+            DirectoryEntry directory = new DirectoryEntry();
+            directory.Name = Encoding.ASCII.GetString(wadBR.ReadBytes(wadBR.ReadInt32()));
+            int SubfileCount = wadBR.ReadInt32();
+
+            for (int i = 0; i < SubfileCount; i++)
+            {
+                SubFileEntry subEntry = ParseSubfile(wadBR);
+                directory.Subfiles.Add(subEntry);
+            }
+            return directory;
+        }
+        #endregion
 
         ///<summary>
         ///Exports the contents of a wad file to a folder.
         ///</summary>
         public void Export(string exportPath)
         {
-            
+
         }
 
         ///<summary>
@@ -80,30 +109,27 @@ namespace DanganLib.Abstraction
         {
 
         }
-        
+
+        public class FileEntry
+        {
+            public string Name { get; set; }
+            public long Size { get; set; }
+            public long Offset { get; set; }
+            public bool External { get; set; }
+            public string source { get; set; }
+        }
+
+        public class DirectoryEntry
+        {
+            public string Name { get; set; }
+            public List<SubFileEntry> Subfiles { get; set; } = new List<SubFileEntry>();
+        }
+
+        public class SubFileEntry
+        {
+            public string Name { get; set; }
+            public bool IsDirectory { get; set; }
+        }
 
     }
-
-    class FileEntry
-    {
-        public string FileName { get; set; }
-        public long FileSize { get; set; }
-        public long FileOffset { get; set; }
-        public bool External { get; set; }
-        public string source { get; set; }
-    }
-
-    class DirectoryEntry
-    {
-        string DirectoryName { get; set; }
-        int SubfileCount { get; set; }
-        List<SubFileEntry> Subfiles { get; set; }
-    }
-
-    class SubFileEntry
-    {
-        string SubfileName { get; set; }
-        bool IsDirectory { get; set; }
-    }
-
 }
