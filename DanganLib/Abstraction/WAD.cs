@@ -20,7 +20,7 @@ namespace DanganLib.Abstraction
         public List<DirectoryEntry> Directories = new List<DirectoryEntry>();
         #endregion
 
-        FileStream File;
+        BinaryReader wadBR; 
 
 
         #region ClassDeclaration 
@@ -29,9 +29,9 @@ namespace DanganLib.Abstraction
         ///<summary>
         ///Creates a WAD variable after parsing an existing file.
         ///</summary>
-        public WAD(FileStream fs) {
-            File = fs ?? throw new ArgumentException("Can't load more then one wad at a time.", "fs");
-            BinaryReader wadBR = new BinaryReader(File);
+        public WAD(BinaryReader br) {
+            wadBR = br ?? throw new ArgumentException("Can't load more then one wad at a time.", "br");
+            
             ParseFile(wadBR);
 
         }
@@ -56,18 +56,13 @@ namespace DanganLib.Abstraction
                 file.Offset = wadBR.ReadInt64();
                 Files.Add(file);
             }
-            //Console.WriteLine(wadBR.BaseStream.Position);
+
             int directoryCount = wadBR.ReadInt32();
-
-            Console.WriteLine(directoryCount);
-
             for (int i = 0; i < directoryCount; i++)
             {
                 DirectoryEntry directory = ParseDirEntry(wadBR);
                 Directories.Add(directory);
             }
-
-            Console.WriteLine(wadBR.BaseStream.Position);
 
         }
 
@@ -99,6 +94,24 @@ namespace DanganLib.Abstraction
         ///</summary>
         public void Export(string exportPath)
         {
+            if (wadBR == null)
+                throw new InvalidDataException("There is no file to extract from.");
+
+            for (int i = 0; i < Directories.Count; i++)
+            {
+                Directory.CreateDirectory($"{exportPath}/{Directories[i].Name}");
+            }
+
+            for (int i = 0; i < Files.Count; i++)
+            {
+                wadBR.BaseStream.Position = Files[i].Offset;
+                var file = File.Create($"{exportPath}/{Files[i].Name}");
+                BinaryWriter bw = new BinaryWriter(file);
+                bw.Write(wadBR.ReadBytes((int)Files[i].Size));
+
+                file.Close();
+            }
+
 
         }
 
