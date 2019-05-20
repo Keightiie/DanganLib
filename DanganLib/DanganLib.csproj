@@ -43,10 +43,13 @@
   <ItemGroup>
     <Compile Include="Abstraction\WAD.cs" />
     <Compile Include="CriWare\CPK.cs" />
+    <Compile Include="Dangan\Games\DR1.cs" />
+    <Compile Include="Dangan\Games\UDG.cs" />
+    <Compile Include="Dangan\Games\DR2.cs" />
+    <Compile Include="Dangan\Scripting\Lin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Dangan\" />
     <Folder Include="SpikeChunsoft\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

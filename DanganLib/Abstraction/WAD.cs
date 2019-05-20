@@ -8,6 +8,8 @@ namespace DanganLib.Abstraction
 {
     public class WAD
     {
+        BinaryReader wadBR;
+
         #region FileInfo
         public string Signature { get; private set; } = "AGAR";
         public int MajorVersion { get; private set; } = 1;
@@ -17,12 +19,11 @@ namespace DanganLib.Abstraction
         byte[] Header { get; set; }
 
         public List<FileEntry> Files = new List<FileEntry>();
+
+
         public List<DirectoryEntry> Directories = new List<DirectoryEntry>();
         long filesPosition { get; set; }
         #endregion
-
-        BinaryReader wadBR; 
-
 
         #region ClassDeclaration 
         public WAD() { }
@@ -51,7 +52,6 @@ namespace DanganLib.Abstraction
             for (int i = 0; i < fileCount; i++)
             {
                 FileEntry file = new FileEntry();
-                file.External = false;
                 file.Name = Encoding.ASCII.GetString(wadBR.ReadBytes(wadBR.ReadInt32()));
                 file.Size = wadBR.ReadInt64();
                 file.Offset = wadBR.ReadInt64();
@@ -92,6 +92,7 @@ namespace DanganLib.Abstraction
         }
         #endregion
 
+        #region Data Management
         ///<summary>
         ///Exports the contents of a wad file to a folder.
         ///</summary>
@@ -119,20 +120,73 @@ namespace DanganLib.Abstraction
         }
 
         ///<summary>
-        ///Compiles everyting into into a wad file.
+        ///Specifies a file to be added to the compiled wad file. 
         ///</summary>
-        public void Compile(string compileDir, string exportPath)
+        public void AddFile(string input, string target)
         {
 
         }
 
+        ///<summary>
+        ///Specifies a folder to be added to the compiled wad file. 
+        ///</summary>
+        public void AddFolder(string input)
+        {
+
+        }
+
+        ///<summary>
+        ///Compiles everyting into into a wad file.
+        ///</summary>
+        public void Compile(string output)
+        {
+
+        }
+        #endregion
+
+        #region Data
+
+        public void RemoveFileByPath(string path)
+        {
+            for(int i = 0; i < Files.Count; i++)
+            {
+                if(Files[i].Name == path)
+                {
+                    Files.RemoveAt(i);
+                    RemoveSubEntryByPath(path);
+                    return;
+                }
+            }
+        }
+
+        void RemoveSubEntryByPath(string path)
+        {
+            for (int i = 0; i < Directories.Count; i++)
+            {
+                if (Path.GetDirectoryName($"{Directories[i].Name}\\dummy.txt") == Path.GetDirectoryName(path))
+                {
+                    for (int x = 0; x < Directories[i].Subfiles.Count; x++)
+                    {
+                        if (Directories[i].Subfiles[x].Name == Path.GetFileName(path))
+                        {
+                            Directories[i].Subfiles.RemoveAt(x);
+                        }
+                    }
+                }
+
+            }
+        }
+
+
+        #endregion
+
+
+        #region Classes
         public class FileEntry
         {
             public string Name { get; set; }
             public long Size { get; set; }
             public long Offset { get; set; }
-            public bool External { get; set; }
-            public string source { get; set; }
         }
 
         public class DirectoryEntry
@@ -146,6 +200,14 @@ namespace DanganLib.Abstraction
             public string Name { get; set; }
             public bool IsDirectory { get; set; }
         }
+
+        class ImportFiles
+        {
+            string FilePath { get; set; }
+            string Target { get; set; }
+            long fileSize { get; set; }
+        }
+        #endregion
 
     }
 }
