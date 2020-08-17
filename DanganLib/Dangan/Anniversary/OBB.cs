@@ -32,7 +32,7 @@ namespace DanganLib.Dangan.Anniversary
 
             if (!ValidSignature()) return;
 
-            OBBFile.ReadBytes(5); //Unknown 5 bytes
+            OBBFile.ReadBytes(5); //Unknown bytes
             FileCount = OBBFile.ReadUInt32();
 
             for (int i = 0; i < FileCount; i++)
@@ -41,6 +41,7 @@ namespace DanganLib.Dangan.Anniversary
                 FileEntry.Name = OBBFile.ReadString();
                 FileEntry.Offset = OBBFile.ReadUInt32();
                 FileEntry.Size = OBBFile.ReadUInt32();
+                OBBFile.ReadBytes(16); //Unknown bytes
 
                 FileEntries.Add(FileEntry);
             }
@@ -64,16 +65,6 @@ namespace DanganLib.Dangan.Anniversary
             }
 
         }
-
-
-
-
-
-
-
-
-
-
 
     }
 }
