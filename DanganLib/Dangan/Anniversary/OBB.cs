@@ -6,7 +6,7 @@ using System.IO;
 
 namespace DanganLib.Dangan.Anniversary
 {
-    class OBB
+    public class OBB
     {
         BinaryReader OBBFile;
 

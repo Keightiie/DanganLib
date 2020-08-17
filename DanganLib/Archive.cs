@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace DanganLib
 {
-    class Archive
+    public class Archive
     {
         public class FileEntry
         {
