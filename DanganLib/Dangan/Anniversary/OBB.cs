@@ -16,7 +16,7 @@ namespace DanganLib.Dangan.Anniversary
 
         private bool ValidSignature() { return Signature == "TP"; }
 
-        public List<Archive.FileEntry> Files = new List<Archive.FileEntry>();
+        public List<Archive.FileEntry> FileEntries = new List<Archive.FileEntry>();
 
         public OBB(BinaryReader BinaryFile)
         {
@@ -42,9 +42,26 @@ namespace DanganLib.Dangan.Anniversary
                 FileEntry.Offset = OBBFile.ReadUInt32();
                 FileEntry.Size = OBBFile.ReadUInt32();
 
-                Files.Add(FileEntry);
+                FileEntries.Add(FileEntry);
             }
 
+
+        }
+
+        public void Export(string exportPath)
+        {
+            if (OBBFile == null)
+                throw new InvalidDataException("There is no file loaded to extract from.");
+
+            for (int i = 0; i < FileEntries.Count; i++)
+            {
+                Directory.CreateDirectory($"{exportPath}/{Path.GetDirectoryName(FileEntries[i].Name)}");
+                OBBFile.BaseStream.Position = FileEntries[i].Offset;
+                var NewFile = File.Create($"{exportPath}/{FileEntries[i].Name}");
+                BinaryWriter FileWriter = new BinaryWriter(NewFile);
+                FileWriter.Write(OBBFile.ReadBytes((int)FileEntries[i].Size));
+                FileWriter.Close();
+            }
 
         }
 
