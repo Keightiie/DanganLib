@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
+using System.CodeDom;
 
 namespace DanganLib.Dangan.Anniversary
 {
     public class OBB
     {
         BinaryReader OBBFile;
+        BinaryWriter OBBFileWriter;
 
 
         public string Signature { get; private set; }
@@ -18,16 +20,15 @@ namespace DanganLib.Dangan.Anniversary
 
         public List<Archive.FileEntry> FileEntries = new List<Archive.FileEntry>();
 
-        public OBB(BinaryReader BinaryFile)
+        public OBB()
         {
-            OBBFile = BinaryFile ?? throw new ArgumentException("File already loaded, can't open more then one file at a time.", "br");
-
-            ParseFileEntries();
 
         }
 
-        void ParseFileEntries()
+        void Parse(BinaryReader BinaryFile)
         {
+            OBBFile = BinaryFile ?? throw new ArgumentException("Alreading operating on a file.", "br");
+
             Signature = Encoding.UTF8.GetString(OBBFile.ReadBytes(2));
 
             if (!ValidSignature()) return;
@@ -64,6 +65,81 @@ namespace DanganLib.Dangan.Anniversary
                 FileWriter.Close();
             }
 
+        }
+
+        public void Pack(string ImportPath)
+        {
+
+            if (OBBFile != null) throw new ArgumentException("A file is already being opperated on.", "br");
+
+            uint offsetLocation = 0;
+            uint FileEntriesEnd = 0;
+
+            OBBFileWriter = new BinaryWriter(new FileStream($"{ImportPath}_packed.obb", FileMode.Create));
+            OBBFileWriter.Write(Encoding.UTF8.GetBytes("TP"));
+            OBBFileWriter.Write((byte)1);
+
+            for (int i = 0; i < 4; i++) 
+            {
+                OBBFileWriter.Write((byte)0);
+            }
+
+
+            string[] allfiles = Directory.GetFiles($"{ImportPath}\\", "*.*", SearchOption.AllDirectories);
+            OBBFileWriter.Write((uint)allfiles.Count());
+
+            foreach (var file in allfiles)
+            {
+                FileInfo info = new FileInfo(file);
+                string str = info.FullName.Remove(0, ImportPath.Length + 1);
+                OBBFileWriter.Write(str);
+                OBBFileWriter.Write(offsetLocation);
+                OBBFileWriter.Write((uint)info.Length);
+                for (int i = 0; i < 16; i++)
+                {
+                    OBBFileWriter.Write((byte)0);
+                }
+
+            }
+
+            FileEntriesEnd = (uint)OBBFileWriter.BaseStream.Position;
+            OBBFileWriter.BaseStream.Position = 3;
+            OBBFileWriter.Write(FileEntriesEnd - 7);
+
+            OBBFileWriter.BaseStream.Position = 11;
+            foreach (var file in allfiles)
+            {
+                FileInfo info = new FileInfo(file);
+                string str = info.FullName.Remove(0, ImportPath.Length + 1);
+                str = str.Replace("\\", "/");
+                OBBFileWriter.Write(str);
+                OBBFileWriter.Write(FileEntriesEnd);
+                FileEntriesEnd += (uint)info.Length;
+                OBBFileWriter.Write((uint)info.Length);
+                for (int i = 0; i < 16; i++)
+                {
+                    OBBFileWriter.Write((byte)0);
+                }
+
+            }
+
+            foreach (var file in allfiles)
+            {
+                FileInfo info = new FileInfo(file);
+                BinaryReader ImportFile = new BinaryReader(new FileStream(info.FullName, FileMode.Open));
+                OBBFileWriter.Write(ImportFile.ReadBytes((int)ImportFile.BaseStream.Length));
+                ImportFile.Close();
+
+            }
+            OBBFileWriter.Close();
+
+
+            OBBFile = new BinaryReader(new FileStream($"{ImportPath}_packed.obb", FileMode.Open));
+        }
+
+        public void Close() 
+        {
+            if (OBBFile == null) throw new ArgumentException("No file to close.", "br");
         }
 
     }
