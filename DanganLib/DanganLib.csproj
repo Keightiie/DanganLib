@@ -43,7 +43,7 @@
   <ItemGroup>
     <Compile Include="Abstraction\WAD.cs" />
     <Compile Include="CriWare\CPK.cs" />
-    <Compile Include="Dangan\Anniversary\OBB.cs" />
+    <Compile Include="Dangan\Anniversary\TB.cs" />
     <Compile Include="Dangan\Games\DR1.cs" />
     <Compile Include="Dangan\Games\UDG.cs" />
     <Compile Include="Dangan\Games\DR2.cs" />
