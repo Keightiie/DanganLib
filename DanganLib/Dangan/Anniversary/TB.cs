@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
-using System.CodeDom;
 
 namespace DanganLib.Dangan.Anniversary
 {
@@ -25,7 +24,8 @@ namespace DanganLib.Dangan.Anniversary
 
         }
 
-        void Parse(BinaryReader BinaryFile)
+
+        public void Parse(BinaryReader BinaryFile)
         {
             TBFile = BinaryFile ?? throw new ArgumentException("Alreading operating on a file.", "br");
 
@@ -67,7 +67,7 @@ namespace DanganLib.Dangan.Anniversary
 
         }
 
-        public void Pack(string ImportPath)
+        public void Pack(string ImportPath, string ExportPath)
         {
 
             if (TBFile != null) throw new ArgumentException("A file is already being opperated on.", "br");
@@ -75,7 +75,7 @@ namespace DanganLib.Dangan.Anniversary
             uint offsetLocation = 0;
             uint FileEntriesEnd = 0;
 
-            TBFileWriter = new BinaryWriter(new FileStream($"{ImportPath}_packed.obb", FileMode.Create));
+            TBFileWriter = new BinaryWriter(new FileStream(ExportPath, FileMode.Create));
             TBFileWriter.Write(Encoding.UTF8.GetBytes("TP"));
             TBFileWriter.Write((byte)1);
 
